@@ -52,7 +52,7 @@ shell_loop:
         CheckCommand KBBuffer, DrawCMD, 4, draw
         CheckCommand KBBuffer, ClearsCMD, 6, clears_cmd
         CheckCommand KBBuffer, ClockCMD, 5, clock
-        CheckCommand KBBuffer, KCallCMD, 5, clock
+        CheckCommand KBBuffer, KCallCMD, 5, kcall_cmd
         cmp byte[com_ok], 0
         jne shell_loop
         puts wc
@@ -80,7 +80,7 @@ clock_cmd:
 
 kcall_cmd:
     mov cx, [bHShell_kernelBufferPointer]
-    memcpy KBBuffer + 6, bHShell_kernelBufferPointer, 26
+    memcpy KBBuffer + 6, cx, 26
     ret
 
 reboot:
