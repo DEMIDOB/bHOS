@@ -100,8 +100,8 @@ HelloMsg db "bHOS is successfully loaded from disk ", 0
 OsTitle db "bHOS v0.7", 0
 
 ; Buffers:
-KBBuffer:
-times 32 db 0
+KBBuffer db 0
+times 31 db 0
 STCurrentTimeString db "Current time is "
 STHoursBuffer db 0, 0
 db ":"
