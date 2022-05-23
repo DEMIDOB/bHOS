@@ -101,6 +101,9 @@ kernel_start:
         cmp [installedProgramsAmount], 0
         je no_apps
 
+        puts installedProgramsList
+        call inc_row
+
         xor di, di
 
         ; get requested program size (in sectors)
