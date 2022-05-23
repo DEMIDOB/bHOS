@@ -86,7 +86,8 @@ kernel_start:
         mov bx, 32
         push bx
         push cx
-        push reservedSector
+        mov bx, reservedSector
+        push bx
         call memcpy
 
         add cx, 3
