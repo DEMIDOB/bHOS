@@ -103,9 +103,11 @@ kernel_start:
         cmp [installedProgramsAmount], 0
         je no_apps
 
+        xor bx, bx
+
         ; get requested program size (in sectors)
         mov bl, requested_program
-        imul bl, PROGRAM_REF_SIZE
+        imul bx, PROGRAM_REF_SIZE
         add bl, 2
         add bl, installedProgramsList
         mov al, [bl]
