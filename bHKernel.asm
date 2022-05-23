@@ -150,7 +150,8 @@ kernel_start:
 requested_program dw 0
 current_program dw 0
 
-kernelCallBuffer times 32 db 0
+kernelCallBuffer:
+times 32 db 0
 
 ; data
 
