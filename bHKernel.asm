@@ -107,7 +107,7 @@ kernel_start:
         xor di, di
 
         ; get requested program size (in sectors)
-        mov di, requested_program
+        mov di, word[requested_program]
         imul di, PROGRAM_REF_SIZE
         add di, 2
         add di, installedProgramsList
