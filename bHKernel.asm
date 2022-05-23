@@ -135,7 +135,8 @@ kernel_start:
         int 0x13       ; boom!
 
         memcpy requested_program, current_program, 2
-        mov [program_start + 4], kernelCallBuffer
+        mov ax, kernelCallBuffer
+        mov [program_start + 4], ax
     
         ; mov word[current_program], word[requested_program]
         call program_start + 32
