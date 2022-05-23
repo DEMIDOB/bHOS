@@ -13,6 +13,7 @@ macro memcpy source, dest, size { ; size in bytes
 		mov dl, byte[si]
 		mov [di], dl
 		inc si
+		inc di
 
 		jmp memcpy_loop
 
