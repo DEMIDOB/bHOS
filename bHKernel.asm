@@ -140,9 +140,12 @@ kernel_start:
         call program_start + 32
 
     no_apps:
+        pop cl
         printc ':', 0xA
         call inc_cursor
         printc '(', 0xA
+        call inc_cursor
+        printc cl, 0xC
         jmp $
 
 
