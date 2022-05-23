@@ -11,19 +11,6 @@ times 32 - ($ - shellProgramSignature) db 0
 
 
 bHShell:
-macro CheckCommand src, com, len, action {
-    push di
-    push si
-        
-    mov di, src
-    mov si, com
-    mov cx, len
-        
-    repe cmpsb
-    pop si
-    pop di
-    je action
-}
 
 shell:
         mov ax, 0x03
@@ -81,7 +68,8 @@ clock_cmd:
 kcall_cmd:
     mov cx, [bHShell_kernelBufferPointer]
     memcpy KBBuffer + 6, cx, 26
-    ret
+    jmp [bHShell_kernelBufferPointer + 128]
+    
 
 reboot:
     mov byte[com_ok], 1

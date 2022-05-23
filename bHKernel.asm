@@ -1,4 +1,5 @@
 include 'bHMemory.asm'
+include 'bHCommandUtility.asm'
 
 PROGRAM_REF_SIZE = 32
 
@@ -55,8 +56,8 @@ get_time:
 ; ============== kernel functions ==============
 
 k_get_installed_programs_amount:
-    push word[installedProgramsAmount]
-    ret
+    printc '!', 0xF
+    jmp $
 
 ; ============ kernel functions end ============
 
@@ -139,7 +140,7 @@ kernel_start:
         mov [program_start + 4], ax
     
         ; mov word[current_program], word[requested_program]
-        call program_start + 32
+        jmp program_start + 32
 
         cmp byte[kernelCallBuffer], 0
         je no_apps
@@ -152,6 +153,10 @@ kernel_start:
         printc '(', 0xA
         jmp $
 
+
+    kernelCallBuffer:
+        times 128 db 0
+
     kernelCall:
         puts kernelCallBuffer
         jmp $
@@ -159,10 +164,6 @@ kernel_start:
 
 requested_program dw 0
 current_program dw 0
-
-kernelCallBuffer:
-times 32 db 0
-db 0
 
 ; data
 
@@ -172,6 +173,11 @@ times 512 db 0
 scanOffset db 0
 installedProgramsAmount dw 0
 installedProgramsList:
+
+; ========== kernel calls ==========
+
+
+; ======== kernel calls end ========
 
 
 kernel_end:

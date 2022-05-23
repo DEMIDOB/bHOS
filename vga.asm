@@ -94,7 +94,7 @@ macro inps buffer {
     push si
     push di
     mov si, buffer
-    mov di, 16
+    mov di, 32
     mov bp, di
     sread:
         xor ah, ah
