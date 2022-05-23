@@ -4,6 +4,7 @@ CLOCK_PROGRAM_SIZE = 1
 
 clockProgramSignature db 0x09, 0x11
 db CLOCK_PROGRAM_SIZE
+db 0x00
 clock_program_name db 'bHClock'
 times 32 - ($ - clockProgramSignature) db 0
 

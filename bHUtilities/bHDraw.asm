@@ -4,6 +4,7 @@ DRAW_PROGRAM_SIZE = 1
 
 drawProgramSignature db 0x09, 0x11
 db DRAW_PROGRAM_SIZE
+db 0x00
 drawProgramName db "bHDraw"
 times 32 - ($ - drawProgramSignature) db 0
 

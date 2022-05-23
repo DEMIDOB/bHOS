@@ -74,6 +74,8 @@ kernel_start:
         jne start_requested_app        
         ; === check for bHProgram signature ===
 
+        mov al, cl
+
         push cx
 
         mov cx, [installedProgramsAmount]
@@ -81,6 +83,9 @@ kernel_start:
         add cx, installedProgramsList
 
         memcpy reservedSector, cx, 32
+
+        add cx, 3
+        mov [cx], al
 
         pop cx
 
@@ -97,14 +102,25 @@ kernel_start:
         cmp [installedProgramsAmount], 0
         je no_apps
 
-        add [installedProgramsAmount], 0x30
-        printc byte[installedProgramsAmount], 0xB
-        call inc_row
-        puts installedProgramsList
-        jmp $
+        ; get requested program size (in sectors)
+        mov bl, requested_program
+        imul bl, PROGRAM_REF_SIZE
+        add bl, 2
+        add bl, installedProgramsList
+        mov al, [bl]
+
+        ; calculate its position on disk
+        inc bl
+        mov cl, [bl]
+
+        mov ch, 0x00 ; cylinder 0
+        xor dh, dh     ; head 0
+        mov bx, program_start ; write to RAM from here
+        mov ah, 0x02   ; read sectors into memory
+        int 0x13       ; boom!
     
         ; mov word[current_program], word[requested_program]
-        jmp word[current_program]
+        jmp program_start
 
     no_apps:
         printc ':', 0xA
@@ -113,8 +129,8 @@ kernel_start:
         jmp $
 
 
-requested_program dw bHShell
-current_program dw bHShell
+requested_program dw 0
+current_program dw 0
 
 ; data
 
