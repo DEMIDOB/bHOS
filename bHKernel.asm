@@ -122,6 +122,8 @@ kernel_start:
         mov bx, program_start ; write to RAM from here
         mov ah, 0x02   ; read sectors into memory
         int 0x13       ; boom!
+
+        memcpy requested_program, current_program, 2
     
         ; mov word[current_program], word[requested_program]
         jmp program_start + 32
@@ -133,7 +135,7 @@ kernel_start:
         jmp $
 
 
-requested_program dw 0
+requested_program dw 1
 current_program dw 0
 
 ; data
