@@ -1,5 +1,3 @@
-org 0x7c00 + 0x0800
-
 SHELL_PROGRAM_SIZE = 2
 
 shellProgramSignature db 0x09, 0x11
@@ -68,7 +66,14 @@ clock_cmd:
 kcall_cmd:
     mov cx, [bHShell_kernelBufferPointer]
     memcpy KBBuffer + 6, cx, 26
-    jmp [bHShell_kernelBufferPointer + 128]
+    mov cx, word[bHShell_kernelBufferPointer]
+    add cx, 128
+    mov bx, asdasd
+    push bx
+    jmp cx
+    asdasd:
+    printc 'g', 0xC
+    jmp shell_loop
     
 
 reboot:

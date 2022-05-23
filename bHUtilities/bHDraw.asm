@@ -1,10 +1,11 @@
-org 0x7c00 + 0x0800
+org 0x7c00 + 0x800
 
 DRAW_PROGRAM_SIZE = 1
 
 drawProgramSignature db 0x09, 0x11
 db DRAW_PROGRAM_SIZE
 db 0x00
+bHDraw_kernelBufferPointer dw 0x0000
 drawProgramName db "bHDraw"
 times 32 - ($ - drawProgramSignature) db 0
 

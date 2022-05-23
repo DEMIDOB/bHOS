@@ -158,8 +158,12 @@ kernel_start:
         times 128 db 0
 
     kernelCall:
+        printc 'f', 0xA
+        call inc_cursor
         puts kernelCallBuffer
-        jmp $
+        call inc_row
+        pop bx
+        jmp bx
 
 
 requested_program dw 0
