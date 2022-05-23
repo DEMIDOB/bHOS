@@ -1,3 +1,5 @@
+include 'bHMemory.asm'
+
 PROGRAM_REF_SIZE = 32
 
 macro int_to_char2 num, buffer {
@@ -72,47 +74,15 @@ kernel_start:
         jne start_requested_app        
         ; === check for bHProgram signature ===
 
-        push dx
-        push si
+        push cx
 
-        ; it's 3am im tired sorry for not using kinda loop...
+        mov cx, [installedProgramsAmount]
+        imul cx, PROGRAM_REF_SIZE
+        add cx, installedProgramsList
 
-        mov dx, word[reservedSector]
-        mov si, [installedProgramsAmount]
-        imul si, PROGRAM_REF_SIZE
-        add si, installedProgramsList
-        mov [si], dx
+        memcpy reservedSector, cx, 32
 
-        mov dx, word[reservedSector + 2]
-        add si, 2
-        mov [si], dx
-
-        mov dx, word[reservedSector + 4]
-        add si, 2
-        mov [si], dx
-
-        mov dx, word[reservedSector + 6]
-        add si, 2
-        mov [si], dx
-
-        mov dx, word[reservedSector + 8]
-        add si, 2
-        mov [si], dx
-
-        mov dx, word[reservedSector + 10]
-        add si, 2
-        mov [si], dx
-
-        mov dx, word[reservedSector + 12]
-        add si, 2
-        mov [si], dx
-
-        mov dx, word[reservedSector + 14]
-        add si, 2
-        mov [si], dx
-
-        pop si
-        pop dx
+        pop cx
 
         inc [installedProgramsAmount]
         mov dh, byte[scanOffset]
