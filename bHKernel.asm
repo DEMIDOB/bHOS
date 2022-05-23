@@ -110,6 +110,10 @@ kernel_start:
         add di, installedProgramsList
         mov al, byte[di]
 
+        add al, 0x30
+        printc al, 0xB
+        jmp $
+
         ; calculate its position on disk
         inc di
         mov cl, byte[di]
@@ -119,10 +123,6 @@ kernel_start:
         mov bx, program_start ; write to RAM from here
         mov ah, 0x02   ; read sectors into memory
         int 0x13       ; boom!
-
-        add al, 0x30
-        printc al, 0xB
-        jmp $
     
         ; mov word[current_program], word[requested_program]
         jmp program_start
