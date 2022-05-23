@@ -23,10 +23,6 @@ mov bx, 0x7E00 ; write to RAM from here
 mov ah, 0x02   ; read sectors into memory
 int 0x13       ; boom!
 
-printc 'Y', 0xF
-
-printc byte[0x7E00], 0xF
-
 jmp kernel_start
 
 boot_disk db 0x80

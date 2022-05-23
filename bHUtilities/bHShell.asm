@@ -82,7 +82,7 @@ reboot:
 
 shutdown:
     ; i know that's kinda stupid ahahha
-    jmp $
+    ret
 
 
 ; System info:
