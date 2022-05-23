@@ -29,8 +29,6 @@ shell:
         int 0x10
 
         set_cur 71, 24
-        printc 'p', 0xE
-        jmp $
         puts OsTitle
         set_cur 0, 0
         puts HelloMsg

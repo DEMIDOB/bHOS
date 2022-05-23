@@ -26,8 +26,8 @@ include 'bootloader.asm'
 os_start:
 include 'bHKernel.asm'
 
+program_start:
+
 include 'bHUtilities/bHShell.asm'
 include 'bHUtilities/bHDraw.asm'
 include 'bHUtilities/bHClock.asm'
-
-program_start:
