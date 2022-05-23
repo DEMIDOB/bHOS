@@ -52,6 +52,7 @@ shell_loop:
         CheckCommand KBBuffer, DrawCMD, 4, draw
         CheckCommand KBBuffer, ClearsCMD, 6, clears_cmd
         CheckCommand KBBuffer, ClockCMD, 5, clock
+        CheckCommand KBBuffer, KCallCMD, 5, clock
         cmp byte[com_ok], 0
         jne shell_loop
         puts wc
@@ -77,6 +78,10 @@ clock_cmd:
     mov byte[com_ok], 1
     jmp clock
 
+kcall_cmd:
+    memcpy KBBuffer + 6, bHShell_kernelBufferPointer, 26
+    ret
+
 reboot:
     mov byte[com_ok], 1
     int 0x19
@@ -94,13 +99,15 @@ HelloMsg db "bHOS is successfully loaded from disk ", 0
 OsTitle db "bHOS v0.7", 0
 
 ; Buffers:
-KBBuffer db 0
-times 16 db 0
+KBBuffer:
+times 32 db 0
 STCurrentTimeString db "Current time is "
 STHoursBuffer db 0, 0
 db ":"
 STMinutesBuffer db 0, 0
 db 0
+reserveBuffer:
+times 32 db 0
 
 ; CMDs:
 RebootCMD db 'reboot', 0
@@ -110,6 +117,7 @@ ClearsCMD db 'clears', 0
 
 DrawCMD db 'draw', 0
 ClockCMD db 'clock', 0
+KCallCMD db 'kcall', 0
 
 InfoCMD db 'info', 0
 InfoRP db 'bHOS by DEM!DOB v0.7', 0

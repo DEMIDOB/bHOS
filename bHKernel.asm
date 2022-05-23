@@ -142,7 +142,7 @@ kernel_start:
         call program_start + 32
 
         cmp byte[kernelCallBuffer], 0
-        je start_requested_app
+        je no_apps
 
         jmp kernelCall
 
@@ -153,7 +153,7 @@ kernel_start:
         jmp $
 
     kernelCall:
-        printc '!', 0xD
+        puts kernelCallBuffer
         jmp $
 
 
@@ -162,6 +162,7 @@ current_program dw 0
 
 kernelCallBuffer:
 times 32 db 0
+db 0
 
 ; data
 
