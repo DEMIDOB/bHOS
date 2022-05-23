@@ -1,4 +1,20 @@
-memcpy: ; (source, dest, size)
+macro memcpy source, dest, size {
+	push ax
+	push si
+	push di
+
+	mov si, source
+	mov di, dest
+	mov ax, size
+	call _memcpy
+
+	pop di
+	pop si
+	pop ax
+}
+
+
+_memcpy: ; (source, dest, size)
 
 	add ax, si ; loop end
 

@@ -83,10 +83,7 @@ kernel_start:
         imul cx, PROGRAM_REF_SIZE
         add cx, installedProgramsList
 
-        mov si, reservedSector
-        mov di, cx
-        mov ax, 32
-        call memcpy
+        memcpy reservedSector, cx, 32
 
         add cx, 3
         mov di, cx
@@ -127,11 +124,8 @@ kernel_start:
         mov bx, program_start ; write to RAM from here
         mov ah, 0x02   ; read sectors into memory
         int 0x13       ; boom!
-
-        mov ax, 2
-        mov di, current_program
-        mov si, requested_program
-        call memcpy
+        
+        memcpy requested_program, current_program, 2
     
         ; mov word[current_program], word[requested_program]
         jmp program_start + 32
