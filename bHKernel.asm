@@ -95,8 +95,6 @@ kernel_start:
         add dh, byte[reservedSector + 2]
         mov byte[scanOffset], dh
 
-        printc [scanOffset], 0xB
-
         jmp scan_installed_apps
 
     start_requested_app:
@@ -121,6 +119,10 @@ kernel_start:
         mov bx, program_start ; write to RAM from here
         mov ah, 0x02   ; read sectors into memory
         int 0x13       ; boom!
+
+        add al, 0x30
+        printc al, 0xB
+        jmp $
     
         ; mov word[current_program], word[requested_program]
         jmp program_start
