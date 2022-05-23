@@ -83,11 +83,9 @@ kernel_start:
         imul cx, PROGRAM_REF_SIZE
         add cx, installedProgramsList
 
-        mov bx, 32
-        push bx
-        push cx
-        mov bx, reservedSector
-        push bx
+        mov si, reservedSector
+        mov di, cx
+        mov ax, 32
         call memcpy
 
         add cx, 3
