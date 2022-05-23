@@ -124,7 +124,7 @@ kernel_start:
         int 0x13       ; boom!
     
         ; mov word[current_program], word[requested_program]
-        jmp program_start
+        jmp program_start + 32
 
     no_apps:
         printc ':', 0xA
