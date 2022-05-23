@@ -1,13 +1,12 @@
-macro memcpy source, dest, size { ; size in bytes
-	push dx
-	push si
-	push di
+memcpy: ; (source, dest, size)
+	pop si
+	pop di
+	pop ax
 
-	mov si, source
-	mov di, dest
+	add ax, si ; loop end
 
 	memcpy_loop:
-		cmp si, source + size
+		cmp si, ax
 		je memcpy_loop_end
 
 		mov dl, byte[si]
@@ -18,8 +17,4 @@ macro memcpy source, dest, size { ; size in bytes
 		jmp memcpy_loop
 
 	memcpy_loop_end:
-
-	pop di
-	pop si
-	pop dx
-}
+		ret

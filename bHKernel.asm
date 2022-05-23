@@ -82,7 +82,10 @@ kernel_start:
         imul cx, PROGRAM_REF_SIZE
         add cx, installedProgramsList
 
-        memcpy reservedSector, cx, 32
+        push 32
+        push cx
+        push reservedSector
+        call memcpy
 
         add cx, 3
         mov di, cx
@@ -123,7 +126,10 @@ kernel_start:
         mov ah, 0x02   ; read sectors into memory
         int 0x13       ; boom!
 
-        memcpy requested_program, current_program, 2
+        push 2
+        push current_program
+        push requested_program
+        call memcpy
     
         ; mov word[current_program], word[requested_program]
         jmp program_start + 32
