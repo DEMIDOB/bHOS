@@ -83,6 +83,8 @@ kcall_cmd:
     memcpy KBBuffer + 6, bHShell_kernelBufferPointer, 26
     ret
 
+org 0x7c00 + 0x800
+
 reboot:
     mov byte[com_ok], 1
     int 0x19
