@@ -1,7 +1,4 @@
 memcpy: ; (source, dest, size)
-	pop si
-	pop di
-	pop ax
 
 	add ax, si ; loop end
 
