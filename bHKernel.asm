@@ -113,10 +113,6 @@ kernel_start:
         add di, installedProgramsList
         mov al, byte[di]
 
-        add al, 0x30
-        printc al, 0xB
-        jmp $
-
         ; calculate its position on disk
         inc di
         mov cl, byte[di]
