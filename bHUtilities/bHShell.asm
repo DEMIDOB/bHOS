@@ -79,11 +79,9 @@ clock_cmd:
     jmp clock
 
 kcall_cmd:
-    org 0x7c00
+    mov cx, [bHShell_kernelBufferPointer]
     memcpy KBBuffer + 6, bHShell_kernelBufferPointer, 26
     ret
-
-org 0x7c00 + 0x800
 
 reboot:
     mov byte[com_ok], 1
