@@ -76,13 +76,15 @@ kernel_start:
 
         mov al, cl
 
+        push bx
         push cx
 
         mov cx, [installedProgramsAmount]
         imul cx, PROGRAM_REF_SIZE
         add cx, installedProgramsList
 
-        push 32
+        mov bx, 32
+        push bx
         push cx
         push reservedSector
         call memcpy
@@ -91,6 +93,7 @@ kernel_start:
         mov di, cx
         mov [di], al
 
+        pop bx
         pop cx
 
         inc [installedProgramsAmount]
@@ -106,6 +109,8 @@ kernel_start:
 
         puts installedProgramsList
         call inc_row
+
+        jmp $
 
         xor di, di
 
