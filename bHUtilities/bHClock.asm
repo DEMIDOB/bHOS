@@ -1,4 +1,11 @@
-clock_program_name db 'bHClock v0.1'
+org 0x7c00 + 0x0800
+
+CLOCK_PROGRAM_SIZE = 1
+
+clockProgramSignature db 0x09, 0x11
+db CLOCK_PROGRAM_SIZE
+clock_program_name db 'bHClock'
+times 32 - ($ - clockProgramSignature) db 0
 
 clock:
 
@@ -24,3 +31,5 @@ clockloop:
                 cmp al, 27
                 je shell
                 jmp clockloop
+
+times 512 * SHELL_PROGRAM_SIZE - ($ - shellProgramSignature) db 0

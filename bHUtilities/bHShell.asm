@@ -4,7 +4,7 @@ SHELL_PROGRAM_SIZE = 2
 
 shellProgramSignature db 0x09, 0x11
 db SHELL_PROGRAM_SIZE
-db "kHShell", 0
+db "bHShell", 0
 times 32 - ($ - shellProgramSignature) db 0
 
 

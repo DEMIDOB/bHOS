@@ -88,27 +88,27 @@ kernel_start:
         mov [si], dx
 
         mov dx, word[reservedSector + 4]
-        add si, 4
+        add si, 2
         mov [si], dx
 
         mov dx, word[reservedSector + 6]
-        add si, 6
+        add si, 2
         mov [si], dx
 
         mov dx, word[reservedSector + 8]
-        add si, 8
+        add si, 2
         mov [si], dx
 
         mov dx, word[reservedSector + 10]
-        add si, 10
+        add si, 2
         mov [si], dx
 
         mov dx, word[reservedSector + 12]
-        add si, 12
+        add si, 2
         mov [si], dx
 
         mov dx, word[reservedSector + 14]
-        add si, 14
+        add si, 2
         mov [si], dx
 
         pop si
@@ -128,7 +128,7 @@ kernel_start:
         je no_apps
 
         add [installedProgramsAmount], 0x30
-        printc byte[installedProgramsAmount], 0xC
+        printc byte[installedProgramsAmount], 0xB
         call inc_row
         puts installedProgramsList
         jmp $
