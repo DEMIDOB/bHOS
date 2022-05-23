@@ -3,41 +3,31 @@ use16
 
 jmp bootloader_start
 
+db 0x4E, 0x54, 0x46, 0x53, 0x20, 0x20, 0x20, 0x20, 0x00, 0x02, 0x08, 0x00, 0x00
+times 5 db 0x00
+db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+times 9 db 0x00
+db 0x80
+times 3 db 0x00
+db 0xFF, 0x4F, 0x77
+times 7 db 0x00
+db 0x04
+times 5 db 0x00
+db 0x02
+times 7 db 0x00
+db 0xF6, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0xF2, 0xD2, 0x08, 0x1C, 0x14, 0x09, 0x1C, 0xB4
+times 4 db 0x00
+
+; AD ED C4 E4 FA C4 E4 C6
+
 include 'vga.asm'
 include 'bootloader.asm'
 
+os_start:
+include 'bHKernel.asm'
+
 include 'bHUtilities/bHShell.asm'
-
-; System info:
-com_ok db 0
-
-; Strings
-HelloMsg db "bHOS is successfully loaded from disk ", 0
-OsTitle db "bHOS v0.7", 0
-
-; Buffers:
-KBBuffer db 0
-times 16 db 0
-STCurrentTimeString db "Current time is "
-STHoursBuffer db 0, 0
-db ":"
-STMinutesBuffer db 0, 0
-db 0
-
-; CMDs:
-RebootCMD db 'reboot', 0
-ShutdownCMD db 'shutdown', 0
-TimeCMD db 'time', 0
-ClearsCMD db 'clears', 0
-
-DrawCMD db 'draw', 0
-ClockCMD db 'clock', 0
-
-InfoCMD db 'info', 0
-InfoRP db 'bHOS by DEM!DOB v0.7', 0
-
-wc db 'Unknown command!', 0
-
-
 include 'bHUtilities/bHDraw.asm'
 include 'bHUtilities/bHClock.asm'
+
+program_start:

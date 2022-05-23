@@ -1,8 +1,13 @@
+org 0x7c00 + 0x0800
 
-drawProgramName db "bHDraw v0.2", 0
+DRAW_PROGRAM_SIZE = 1
+
+drawProgramSignature db 0x09, 0x11
+db DRAW_PROGRAM_SIZE
+drawProgramName db "bHDraw"
+times 32 - ($ - drawProgramSignature) db 0
 
 draw:
-    
     mov ax, 0x003
     int 0x10
     
@@ -10,7 +15,7 @@ draw:
     mov ah, 0
     int 0x10
         
-        set_cur 29, 24
+    set_cur 29, 24
     puts drawProgramName
     
     mov cx, 160
@@ -94,3 +99,6 @@ draw:
         
     exit:
         jmp shell
+
+drawProgramEnd:
+times 512 * DRAW_PROGRAM_SIZE - (drawProgramEnd - drawProgramSignature) db 0

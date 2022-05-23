@@ -1,3 +1,14 @@
+org 0x7c00 + 0x0800
+
+SHELL_PROGRAM_SIZE = 2
+
+shellProgramSignature db 0x09, 0x11
+db SHELL_PROGRAM_SIZE
+db "kHShell", 0
+times 32 - ($ - shellProgramSignature) db 0
+
+
+bHShell:
 macro CheckCommand src, com, len, action {
     push di
     push si
@@ -12,60 +23,6 @@ macro CheckCommand src, com, len, action {
     je action
 }
 
-macro int_to_char2 num, buffer {
-    mov [buffer], 0
-    mov [buffer + 1], 0
-
-    push dx
-    push cx
-    push bx
-    push ax
-
-    mov bl, num
-
-    xor ax, ax
-    xor dx, dx
-    xor cx, cx
-
-    mov al, bl
-    mov cx, 0x10
-    div cx
-    mov [buffer], al
-    mov [buffer + 1], dl
-    
-    add [buffer], 0x30
-    add [buffer + 1], 0x30
-
-    pop ax
-    pop bx
-    pop cx
-    pop dx
-}
-
-;=============SOME KERNEL STUFF=============
-get_time:
-    push cx
-    push dx
-
-    mov ah, 0x02
-    int 0x1A
-
-    ; ch - hour
-    ; cl - minute
-    ; dh - second
-    ; dl - tmp
-
-    int_to_char2 ch, STHoursBuffer
-    int_to_char2 cl, STMinutesBuffer
-    
-    pop dx
-    pop cx
-
-    ret
-
-;=============SOME KERNEL STUFF END=============
-
-os_start:
 shell:
         mov ax, 0x03
         int 0x10
@@ -125,3 +82,36 @@ reboot:
 shutdown:
     ; i know that's kinda stupid ahahha
     jmp $
+
+
+; System info:
+com_ok db 0
+
+; Strings
+HelloMsg db "bHOS is successfully loaded from disk ", 0
+OsTitle db "bHOS v0.7", 0
+
+; Buffers:
+KBBuffer db 0
+times 16 db 0
+STCurrentTimeString db "Current time is "
+STHoursBuffer db 0, 0
+db ":"
+STMinutesBuffer db 0, 0
+db 0
+
+; CMDs:
+RebootCMD db 'reboot', 0
+ShutdownCMD db 'shutdown', 0
+TimeCMD db 'time', 0
+ClearsCMD db 'clears', 0
+
+DrawCMD db 'draw', 0
+ClockCMD db 'clock', 0
+
+InfoCMD db 'info', 0
+InfoRP db 'bHOS by DEM!DOB v0.7', 0
+
+wc db 'Unknown command!', 0
+
+times 512 * SHELL_PROGRAM_SIZE - ($ - shellProgramSignature) db 0

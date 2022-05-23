@@ -6,3 +6,5 @@ test/
 
 *.iso
 *.bin
+*.vfd
+*uibak

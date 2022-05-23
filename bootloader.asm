@@ -15,8 +15,6 @@ mov byte[boot_disk], dl
 mov ax, 0x03
 int 0x10
 
-;printc 'X', 0xF
-
 ; load system from the disk
 mov cx, 0x0002 ; cylinder 0, sector 2
 xor dh, dh     ; head 0
@@ -29,7 +27,7 @@ printc 'Y', 0xF
 
 printc byte[0x7E00], 0xF
 
-jmp os_start
+jmp kernel_start
 
 boot_disk db 0x80
 addr dw 0x7E00
