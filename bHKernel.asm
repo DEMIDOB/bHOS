@@ -103,18 +103,18 @@ kernel_start:
         cmp [installedProgramsAmount], 0
         je no_apps
 
-        xor bx, bx
+        xor di, di
 
         ; get requested program size (in sectors)
-        mov bl, requested_program
-        imul bx, PROGRAM_REF_SIZE
-        add bl, 2
-        add bl, installedProgramsList
-        mov al, [bl]
+        mov di, requested_program
+        imul di, PROGRAM_REF_SIZE
+        add di, 2
+        add di, installedProgramsList
+        mov al, byte[di]
 
         ; calculate its position on disk
-        inc bl
-        mov cl, [bl]
+        inc di
+        mov cl, byte[di]
 
         mov ch, 0x00 ; cylinder 0
         xor dh, dh     ; head 0
