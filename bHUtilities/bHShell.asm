@@ -5,6 +5,7 @@ SHELL_PROGRAM_SIZE = 2
 shellProgramSignature db 0x09, 0x11
 db SHELL_PROGRAM_SIZE
 db 0x00
+bHShell_kernelBufferPointer dw 0x0000
 db "bHShell", 0
 times 32 - ($ - shellProgramSignature) db 0
 
@@ -82,7 +83,6 @@ reboot:
 
 shutdown:
     ; i know that's kinda stupid ahahha
-    push 'll'
     ret
 
 

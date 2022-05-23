@@ -135,22 +135,22 @@ kernel_start:
         int 0x13       ; boom!
 
         memcpy requested_program, current_program, 2
+        mov [program_start + 4], kernelCallBuffer
     
         ; mov word[current_program], word[requested_program]
         call program_start + 32
 
     no_apps:
-        pop cx
         printc ':', 0xA
         call inc_cursor
         printc '(', 0xA
-        call inc_cursor
-        printc cl, 0xC
         jmp $
 
 
 requested_program dw 0
 current_program dw 0
+
+kernelCallBuffer times 32 db 0
 
 ; data
 
