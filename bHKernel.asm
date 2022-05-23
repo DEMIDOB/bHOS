@@ -141,10 +141,19 @@ kernel_start:
         ; mov word[current_program], word[requested_program]
         call program_start + 32
 
+        cmp byte[kernelCallBuffer], 0
+        je start_requested_app
+
+        jmp kernelCall
+
     no_apps:
         printc ':', 0xA
         call inc_cursor
         printc '(', 0xA
+        jmp $
+
+    kernelCall:
+        printc '!', 0xD
         jmp $
 
 
