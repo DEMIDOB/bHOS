@@ -85,7 +85,8 @@ kernel_start:
         memcpy reservedSector, cx, 32
 
         add cx, 3
-        mov [cx], al
+        mov di, cx
+        mov [di], al
 
         pop cx
 
