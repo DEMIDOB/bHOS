@@ -109,8 +109,6 @@ kernel_start:
         puts installedProgramsList
         call inc_row
 
-        jmp $
-
         xor di, di
 
         ; get requested program size (in sectors)
@@ -130,9 +128,9 @@ kernel_start:
         mov ah, 0x02   ; read sectors into memory
         int 0x13       ; boom!
 
-        push 2
-        push current_program
-        push requested_program
+        mov ax, 2
+        mov di, current_program
+        mov si, requested_program
         call memcpy
     
         ; mov word[current_program], word[requested_program]
