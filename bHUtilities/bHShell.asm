@@ -82,7 +82,7 @@ reboot:
 
 shutdown:
     ; i know that's kinda stupid ahahha
-    push 'l'
+    push 'll'
     ret
 
 

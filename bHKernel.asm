@@ -140,7 +140,7 @@ kernel_start:
         call program_start + 32
 
     no_apps:
-        pop cl
+        pop cx
         printc ':', 0xA
         call inc_cursor
         printc '(', 0xA
