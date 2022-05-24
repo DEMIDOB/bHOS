@@ -14,7 +14,7 @@ macro memcpy source, dest, size {
 }
 
 
-_memcpy: ; (source, dest, size)
+_memcpy: ; (si: source, di: dest, ax: size)
 
 	add ax, si ; loop end
 
@@ -31,3 +31,26 @@ _memcpy: ; (source, dest, size)
 
 	memcpy_loop_end:
 		ret
+
+
+_memset ; (si: start, ax: lenght, bl: byte to write)
+	pop si
+	pop ax
+	pop bx
+
+	add ax, si
+
+	memset_loop:
+		cmp si, ax
+		je memset_loop_end
+
+		mov [si], bl
+		inc si
+		jmp memset_loop
+
+	memset_loop_end:
+		ret
+
+
+
+

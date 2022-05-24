@@ -113,6 +113,11 @@ kernel_start:
         cmp [installedProgramsAmount], 0
         je no_apps
 
+        cmp [requested_program], [installedProgramsAmount]
+        jae no_apps
+
+        call unload_current_program
+
         puts installedProgramsList
         call inc_row
 
@@ -147,6 +152,21 @@ kernel_start:
 
         jmp kernelCall
 
+    unload_current_program:
+        ; get programs's size
+        mov ax, 0
+        mov bx, ax
+        mov al, byte[program_start]
+        imul ax, 512
+
+        ; call memset (si: start, ax: lenght, bl: byte to write)
+        push bx
+        push ax
+        push program_start
+        call memset
+
+        ret
+
     no_apps:
         printc ':', 0xA
         call inc_cursor
@@ -165,12 +185,20 @@ kernel_start:
         jmp bx
 
     kernelCall_run:
-    
-        jmp kernelCallReturn
+        mov si, kernelCallBuffer
+        add si, 4
+        mov di, requested_program
+        add di, 1
+        mov ax, 1
+        call  _memcpy
+        jmp start_requested_app
 
 
 requested_program dw 0
 current_program dw 0
+
+tmpBuffer db 0
+times 127 db 0
 
 ; kernel calls' cmds
 
