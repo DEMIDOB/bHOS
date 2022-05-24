@@ -77,6 +77,20 @@ macro printc char, attr {
     int 0x10  
 }
 
+macro fast_printc char {
+    printc char, 0xF
+    call inc_cursor
+}
+
+macro fast_printn num {
+    push dx
+    mov dl, num
+    add dl, 0x30
+    printc dl, 0xF
+    pop dx
+    call inc_cursor
+}
+
 sloop:
     printc [si], 0xF
     inc si

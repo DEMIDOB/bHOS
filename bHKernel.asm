@@ -89,7 +89,7 @@ kernel_start:
         push bx
         push cx
 
-        mov cx, [installedProgramsAmount]
+        mov cx, word[installedProgramsAmount]
         imul cx, PROGRAM_REF_SIZE
         add cx, installedProgramsList
 
@@ -99,10 +99,13 @@ kernel_start:
         mov di, cx
         mov [di], al
 
+        mov cx, word[installedProgramsAmount]
+        inc cx
+        mov word[installedProgramsAmount], cx
+
         pop bx
         pop cx
 
-        inc [installedProgramsAmount]
         mov dh, byte[scanOffset]
         add dh, byte[reservedSector + 2]
         mov byte[scanOffset], dh
@@ -110,10 +113,11 @@ kernel_start:
         jmp scan_installed_apps
 
     start_requested_app:
-        cmp [installedProgramsAmount], 0
+        cmp word[installedProgramsAmount], 0
         je no_apps
 
-        cmp [requested_program], [installedProgramsAmount]
+        mov di, word[requested_program]
+        cmp di, word[installedProgramsAmount]
         jae no_apps
 
         call unload_current_program
@@ -143,6 +147,8 @@ kernel_start:
         memcpy requested_program, current_program, 2
         mov ax, kernelCallBuffer
         mov [program_start + 4], ax
+
+        call clear_kernelCallBuffer
     
         ; mov word[current_program], word[requested_program]
         jmp program_start + 32
@@ -168,30 +174,68 @@ kernel_start:
         ret
 
     no_apps:
-        printc ':', 0xA
+        printc ':', 0xB
         call inc_cursor
-        printc '(', 0xA
-        jmp $
+        printc '(', 0xB
+        call inc_row
+        call kernelCall_pause
+        call kernelCall_reboot
 
+    clear_kernelCallBuffer:
+        push 0
+        push 128
+        push kernelCallBuffer
+        call memset
+        ret
 
     kernelCallBuffer:
         times 128 db 0
 
     kernelCall:
         CheckCommand kernelCallBuffer, runKCallCmd, 3, kernelCall_run
+        CheckCommand kernelCallBuffer, pauseKCallCmd, 5, kernelCall_pause
+        CheckCommand kernelCallBuffer, rebootKCallCmd, 6, kernelCall_reboot
+        CheckCommand kernelCallBuffer, timestrKCallCmd, 7, kernelCall_timestr
+        CheckCommand kernelCallBuffer, proglistKCallCmd, 8, kernelCall_proglist
 
     kernelCallReturn:
         pop bx
         jmp bx
 
     kernelCall_run:
+        puts kernelCallBuffer
+        call inc_row
         mov si, kernelCallBuffer
         add si, 4
         mov di, requested_program
-        add di, 1
         mov ax, 1
         call  _memcpy
+        sub word[requested_program], 0x30
         jmp start_requested_app
+
+    kernelCall_pause:
+        puts pauseKCallCmd
+        xor ah, ah
+        int 0x16
+        call clear_kernelCallBuffer
+        ret
+
+    kernelCall_timestr:
+        call get_time
+        call clear_kernelCallBuffer
+        memcpy STHoursBuffer, kernelCallBuffer, 6
+        ret
+
+    kernelCall_proglist:
+        call clear_kernelCallBuffer
+        push ax
+        mov ax, installedProgramsAmount
+        mov word[kernelCallBuffer], ax
+        pop ax
+        ret
+
+    kernelCall_reboot:
+        int 0x19
 
 
 requested_program dw 0
@@ -202,9 +246,18 @@ times 127 db 0
 
 ; kernel calls' cmds
 
-runKCallCmd db "run"
+runKCallCmd db "run", 0
+pauseKCallCmd db "pause", 0
+timestrKCallCmd db "timestr", 0
+proglistKCallCmd db "proglist", 0
+rebootKCallCmd db "reboot", 0
 
 ; data
+
+STHoursBuffer db 0, 0
+db ":"
+STMinutesBuffer db 0, 0
+db 0
 
 reservedSector:
 times 512 db 0

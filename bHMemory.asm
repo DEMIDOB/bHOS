@@ -33,10 +33,12 @@ _memcpy: ; (si: source, di: dest, ax: size)
 		ret
 
 
-_memset ; (si: start, ax: lenght, bl: byte to write)
+memset: ; (si: start, ax: lenght, bl: byte to write)
+	pop cx
 	pop si
 	pop ax
 	pop bx
+	push cx
 
 	add ax, si
 

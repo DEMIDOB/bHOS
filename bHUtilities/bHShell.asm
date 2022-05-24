@@ -10,6 +10,8 @@ times 32 - ($ - shellProgramSignature) db 0
 
 bHShell:
 
+include 'kernelCall.asm'
+
 shell:
         mov ax, 0x03
         int 0x10
@@ -37,7 +39,8 @@ shell_loop:
         CheckCommand KBBuffer, DrawCMD, 4, draw
         CheckCommand KBBuffer, ClearsCMD, 6, clears_cmd
         CheckCommand KBBuffer, ClockCMD, 5, clock
-        CheckCommand KBBuffer, KCallCMD, 5, kcall_cmd
+        CheckCommand KBBuffer, KCallCMD, 6, kernel_cmd
+        CheckCommand KBBuffer, ProglistCMD, 8, proglist_cmd
         cmp byte[com_ok], 0
         jne shell_loop
         puts wc
@@ -63,22 +66,27 @@ clock_cmd:
     mov byte[com_ok], 1
     jmp clock
 
-kcall_cmd:
-    mov cx, [bHShell_kernelBufferPointer]
-    memcpy KBBuffer + 6, cx, 26
-    mov cx, word[bHShell_kernelBufferPointer]
-    add cx, 128
-    mov bx, asdasd
-    push bx
-    jmp cx
-    asdasd:
-    printc 'g', 0xC
+kernel_cmd:
+    kernelCall KBBuffer + 7, bHShell_kernelBufferPointer
+    puts [bHShell_kernelBufferPointer]
     jmp shell_loop
-    
+
+proglist_cmd:
+    kernelCall KBBuffer, bHShell_kernelBufferPointer
+    mov si, word[bHShell_kernelBufferPointer]
+
+    ; pointer to programsAmount variable is now stored in si
+
+    mov bx, word[si]
+    add bh, 0x30
+    mov byte[ProgramsAmountMsgNum], bh
+    puts ProgramsAmountMsgStart
+    jmp shell_loop
+
 
 reboot:
     mov byte[com_ok], 1
-    int 0x19
+    kernelCall KBBuffer, bHShell_kernelBufferPointer
 
 shutdown:
     ; i know that's kinda stupid ahahha
@@ -92,14 +100,17 @@ com_ok db 0
 HelloMsg db "bHOS is successfully loaded from disk ", 0
 OsTitle db "bHOS v0.7", 0
 
+ProgramsAmountMsgStart db "Programms installed: "
+ProgramsAmountMsgNum db 0, 0
+
 ; Buffers:
 KBBuffer db 0
 times 31 db 0
+
 STCurrentTimeString db "Current time is "
-STHoursBuffer db 0, 0
-db ":"
-STMinutesBuffer db 0, 0
-db 0
+STCurrentTimeStringCont:
+times 6 db 0
+
 reserveBuffer:
 times 32 db 0
 
@@ -108,10 +119,11 @@ RebootCMD db 'reboot', 0
 ShutdownCMD db 'shutdown', 0
 TimeCMD db 'time', 0
 ClearsCMD db 'clears', 0
+ProglistCMD db 'proglist', 0
 
 DrawCMD db 'draw', 0
 ClockCMD db 'clock', 0
-KCallCMD db 'kcall', 0
+KCallCMD db 'kernel', 0
 
 InfoCMD db 'info', 0
 InfoRP db 'bHOS by DEM!DOB v0.7', 0

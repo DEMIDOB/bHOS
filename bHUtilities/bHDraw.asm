@@ -6,7 +6,7 @@ drawProgramSignature db 0x09, 0x11
 db DRAW_PROGRAM_SIZE
 db 0x00
 bHDraw_kernelBufferPointer dw 0x0000
-drawProgramName db "bHDraw"
+drawProgramName db "bHDraw", 0
 times 32 - ($ - drawProgramSignature) db 0
 
 draw:
@@ -100,7 +100,12 @@ draw:
                 jmp output
         
     exit:
-        jmp shell
+        memcpy dHDraw_exitKernelCall, [bHDraw_kernelBufferPointer], 5
+        mov cx, word[bHDraw_kernelBufferPointer]
+        add cx, 128
+        jmp cx
+
+dHDraw_exitKernelCall db "run 0"
 
 drawProgramEnd:
 times 512 * DRAW_PROGRAM_SIZE - (drawProgramEnd - drawProgramSignature) db 0
