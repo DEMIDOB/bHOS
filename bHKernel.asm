@@ -63,10 +63,9 @@ k_get_installed_programs_amount:
 
 
 kernel_start:
-    printc 'j', 0xA
-
     scan_installed_apps:
     
+        mov dl, byte[boot_disk]
         mov ch, 0x00 ; cylinder 0
         mov cl, 0x05 ; sector 5 (initially)
         add cl, [scanOffset]
@@ -138,6 +137,7 @@ kernel_start:
         inc di
         mov cl, byte[di]
 
+        mov dl, byte[boot_disk]
         mov ch, 0x00 ; cylinder 0
         xor dh, dh     ; head 0
         mov bx, program_start ; write to RAM from here
