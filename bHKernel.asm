@@ -158,16 +158,23 @@ kernel_start:
         times 128 db 0
 
     kernelCall:
-        printc 'f', 0xA
-        call inc_cursor
-        puts kernelCallBuffer
-        call inc_row
+        CheckCommand kernelCallBuffer, runKCallCmd, 3, kernelCall_run
+
+    kernelCallReturn:
         pop bx
         jmp bx
+
+    kernelCall_run:
+    
+        jmp kernelCallReturn
 
 
 requested_program dw 0
 current_program dw 0
+
+; kernel calls' cmds
+
+runKCallCmd db "run"
 
 ; data
 
@@ -177,12 +184,6 @@ times 512 db 0
 scanOffset db 0
 installedProgramsAmount dw 0
 installedProgramsList:
-
-; ========== kernel calls ==========
-
-
-; ======== kernel calls end ========
-
 
 kernel_end:
 times 2048-($-$$) db 0
