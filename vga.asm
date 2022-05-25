@@ -75,6 +75,7 @@ inc_row:
     ; scroll then
     mov al, 1
     xor cx, cx
+    mov ch, 2
     mov dh, 23
     mov dl, 79
     mov ah, 0x06
@@ -141,8 +142,10 @@ sloop:
     ret
 
 macro puts str_start_ptr {
-      mov si, str_start_ptr
-      call sloop
+    push si
+    mov si, str_start_ptr
+    call sloop
+    pop si
 }
 
 macro inps buffer {
