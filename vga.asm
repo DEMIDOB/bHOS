@@ -1,32 +1,68 @@
 macro set_cur colomn, row {
+    push ax
+    push bx
+    push dx
+
     mov dh, row
     mov dl, colomn
     mov bh, 0
     mov ah, 2
     int 0x10
+
+    pop dx
+    pop bx
+    pop ax
 }
 
 get_cursor_pos:
     mov bh, 0
     mov ah, 0x03  
     int 0x10
+
     ret
 
 inc_cursor:
+    push ax
+    push bx
+    push cx
+    push dx
+
     call get_cursor_pos 
     inc dl
     mov ah, 2
     int 0x10
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+
     ret
 
 dec_cursor:
+    push ax
+    push bx
+    push cx
+    push dx
+
     call get_cursor_pos
     dec dl
     mov ah, 2
     int 0x10
+    
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+
     ret
 
 inc_row:
+    push ax
+    push bx
+    push cx
+    push dx
+
     call get_cursor_pos
     inc dh
     xor dl, dl
@@ -34,7 +70,24 @@ inc_row:
     int 0x10
     
     cmp dh, 24
-    jae scroll_one_row_down
+    jb inc_row_ret
+
+    ; scroll then
+    mov al, 1
+    xor cx, cx
+    mov dh, 23
+    mov dl, 79
+    mov ah, 0x06
+    int 0x10
+
+    call dec_row
+
+    inc_row_ret:
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
 
     ret
 
@@ -47,34 +100,22 @@ dec_row:
 
     ret
 
-scroll_one_row_down:
-    push ax
-    push dx
-    push cx
-
-    mov al, 1
-    xor cx, cx
-    mov dh, 23
-    mov dl, 79
-    mov ah, 0x06
-    int 0x10
-
-    call dec_row
-
-    pop cx
-    pop dx
-    pop ax
-
-    ret
-
 
 macro printc char, attr {
+    push ax
+    push bx
+    push cx
+
     mov al, char
     mov bl, attr
     mov bh, 0
     mov cx, 1
     mov ah, 0x09
     int 0x10  
+
+    pop cx
+    pop bx
+    pop ax
 }
 
 macro fast_printc char {

@@ -6,10 +6,12 @@ drawProgramSignature db 0x09, 0x11
 db DRAW_PROGRAM_SIZE
 db 0x00
 bHDraw_kernelBufferPointer dw 0x0000
-drawProgramName db "bHDraw", 0
+drawProgramName db "bHDraw v0.2", 0
 times 32 - ($ - drawProgramSignature) db 0
 
 draw:
+    include 'kernelCall.asm'
+
     mov ax, 0x003
     int 0x10
     
@@ -27,9 +29,9 @@ draw:
     
     output:
         cmp cx, 0
-        je exit
+        je bHDraw_exit
         cmp dx, 0
-        je exit
+        je bHDraw_exit
         jne drawpix
         
         jmp output
@@ -44,7 +46,7 @@ draw:
         mov ah, 0x00
         int 0x16
         cmp al, 27
-        je exit
+        je bHDraw_exit
         cmp al, 99
         je draw       
         cmp al, 119
@@ -99,13 +101,10 @@ draw:
                 mov bl, 0000b
                 jmp output
         
-    exit:
-        memcpy dHDraw_exitKernelCall, [bHDraw_kernelBufferPointer], 5
-        mov cx, word[bHDraw_kernelBufferPointer]
-        add cx, 128
-        jmp cx
+    bHDraw_exit:
+        kernelCall bHDraw_exitKernelCall, bHDraw_kernelBufferPointer
 
-dHDraw_exitKernelCall db "run 0"
+bHDraw_exitKernelCall db "run 0"
 
 drawProgramEnd:
 times 512 * DRAW_PROGRAM_SIZE - (drawProgramEnd - drawProgramSignature) db 0

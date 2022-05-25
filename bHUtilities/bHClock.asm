@@ -6,14 +6,12 @@ clockProgramSignature db 0x09, 0x11
 db CLOCK_PROGRAM_SIZE
 db 0x00
 bHClock_kernelBufferPointer dw 0x0000
-clock_program_name db 'bHClock', 0
+clock_program_name db 'bHClock v0.1', 0
 times 32 - ($ - clockProgramSignature) db 0
 
 clock:
-    mov ax, 0x003
-    int 0x10
+    include 'kernelCall.asm'
 
-clockloop:
     mov al, 0x13
     mov ah, 0
     int 0x10
@@ -21,23 +19,35 @@ clockloop:
     set_cur 28, 24
     puts clock_program_name
 
+clockloop:
     set_cur 10, 10
-    call get_time
-    puts STCurrentTimeString - 0x800
+
+    push ax
+    kernelCall bHClock_timestrKernelCall, bHClock_kernelBufferPointer
+    mov ax, [bHClock_kernelBufferPointer]
+    memcpy ax, bHClock_STCurrentTimeStringCont, 5
+    puts bHClock_STCurrentTimeString
+    pop ax
 
     ; Wait for input:
     clprinp:
-        xor ah, ah
+        xor ax, ax
+        mov ah, 1
         int 0x16
         cmp al, 27
         je bHClock_exit
         jmp clockloop
 
     bHClock_exit:
-        memcpy bHClock_exitKernelCall, [bHClock_kernelBufferPointer], 5
-        mov cx, word[bHClock_kernelBufferPointer]
-        add cx, 128
-        jmp cx
+        xor ax, ax
+        int 0x16
+        printc al, 0xB
+        kernelCall bHClock_exitKernelCall, bHClock_kernelBufferPointer
+
+bHClock_timestrKernelCall db "timestr"
+bHClock_STCurrentTimeString db "Current time is "
+bHClock_STCurrentTimeStringCont:
+times 6 db 0
 
 bHClock_exitKernelCall db "run 0"
 

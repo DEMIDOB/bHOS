@@ -1,4 +1,7 @@
 macro kernelCall callString, kernelCallBufferPointer {
+	push ax
+	push dx
+
 	mov dx, [kernelCallBufferPointer]
 	memcpy callString, dx, 26
 
@@ -10,4 +13,7 @@ macro kernelCall callString, kernelCallBufferPointer {
 	push ax
 
 	jmp dx
+
+	pop dx
+	pop ax
 }

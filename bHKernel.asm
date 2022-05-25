@@ -53,14 +53,6 @@ get_time:
 
     ret
 
-; ============== kernel functions ==============
-
-k_get_installed_programs_amount:
-    printc '!', 0xF
-    jmp $
-
-; ============ kernel functions end ============
-
 
 kernel_start:
     scan_installed_apps:
@@ -209,7 +201,7 @@ kernel_start:
         add si, 4
         mov di, requested_program
         mov ax, 1
-        call  _memcpy
+        call _memcpy
         sub word[requested_program], 0x30
         jmp start_requested_app
 

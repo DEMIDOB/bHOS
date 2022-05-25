@@ -1,4 +1,6 @@
-SHELL_PROGRAM_SIZE = 2
+org 0x7c00 + 0x800
+
+SHELL_PROGRAM_SIZE = 3
 
 shellProgramSignature db 0x09, 0x11
 db SHELL_PROGRAM_SIZE
@@ -48,14 +50,39 @@ shell_loop:
 
 jmp $
 
+divider:
+    push ax
+    call inc_row
+
+    mov ax, 80
+
+    divider_loop:
+        cmp ax, 0
+        je divider_loop_end
+
+        fast_printc '-'
+
+        dec ax
+        jmp divider_loop
+
+    divider_loop_end:
+        pop ax
+        ret
+
 info_cmd:
     mov byte[com_ok], 1
     puts InfoRP
     jmp shell_loop
 
 time_cmd:
-    call get_time
-    puts STCurrentTimeString
+    push ax
+
+    kernelCall bHShell_timestrKernelCall, bHShell_kernelBufferPointer
+    mov ax, [bHShell_kernelBufferPointer]
+    memcpy ax, bHShell_STCurrentTimeStringCont, 5
+    puts bHShell_STCurrentTimeString
+
+    pop ax
     jmp shell_loop
 
 clears_cmd:
@@ -74,14 +101,44 @@ kernel_cmd:
 proglist_cmd:
     kernelCall KBBuffer, bHShell_kernelBufferPointer
     mov si, word[bHShell_kernelBufferPointer]
+    mov di, [si]
 
-    ; pointer to programsAmount variable is now stored in si
+    ; pointer to programsAmount variable is now stored in di
 
-    mov bx, word[si]
-    add bh, 0x30
-    mov byte[ProgramsAmountMsgNum], bh
+    mov bx, word[di]
+    add bx, 0x30
+    mov byte[ProgramsAmountMsgNum], bl
     puts ProgramsAmountMsgStart
-    jmp shell_loop
+    call divider
+
+    sub bx, 0x30
+    mov ax, 0 ; counter (al)
+    add di, 8
+
+    proglist_cmd_loop:
+        cmp bl, 0
+        je proglist_cmd_loop_end
+
+        ; loop body
+
+        call inc_row
+        fast_printn al
+        fast_printc ' '
+        fast_printc '|'
+        fast_printc ' '
+        puts di
+
+        ; loop body end
+
+        dec bl
+        inc al
+        add di, PROGRAM_REF_SIZE
+        ; kernelCall PauseCMD, bHShell_kernelBufferPointer
+        jmp proglist_cmd_loop
+
+    proglist_cmd_loop_end:
+        call divider
+        jmp shell_loop
 
 
 reboot:
@@ -107,8 +164,8 @@ ProgramsAmountMsgNum db 0, 0
 KBBuffer db 0
 times 31 db 0
 
-STCurrentTimeString db "Current time is "
-STCurrentTimeStringCont:
+bHShell_STCurrentTimeString db "Current time is "
+bHShell_STCurrentTimeStringCont:
 times 6 db 0
 
 reserveBuffer:
@@ -120,6 +177,7 @@ ShutdownCMD db 'shutdown', 0
 TimeCMD db 'time', 0
 ClearsCMD db 'clears', 0
 ProglistCMD db 'proglist', 0
+PauseCMD db 'pause', 0
 
 DrawCMD db 'draw', 0
 ClockCMD db 'clock', 0
@@ -129,5 +187,8 @@ InfoCMD db 'info', 0
 InfoRP db 'bHOS by DEM!DOB v0.7', 0
 
 wc db 'Unknown command!', 0
+
+; Required kernel calls
+bHShell_timestrKernelCall db "timestr", 0
 
 times 512 * SHELL_PROGRAM_SIZE - ($ - shellProgramSignature) db 0
