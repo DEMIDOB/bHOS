@@ -3,20 +3,26 @@ use16
 
 jmp bootloader_start
 
-db 0x4E, 0x54, 0x46, 0x53, 0x20, 0x20, 0x20, 0x20, 0x00, 0x02, 0x08, 0x00, 0x00
-times 5 db 0x00
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-times 9 db 0x00
-db 0x80
-times 3 db 0x00
-db 0xFF, 0x4F, 0x77
-times 7 db 0x00
-db 0x04
-times 5 db 0x00
-db 0x02
-times 7 db 0x00
-db 0xF6, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0xF2, 0xD2, 0x08, 0x1C, 0x14, 0x09, 0x1C, 0xB4
-times 4 db 0x00
+bootsector:
+    iOEML         db "bHOS_32 "
+    iSectSize     dw  0x200
+    iClustSize    db  1             ; sectors per cluster
+    iResSect      dw  1             ; #of reserved sectors
+    iFatCnt       db  2             ; #of FAT copies
+    iRootSize     dw  224           ; size of root directory
+    iTotalSect    dw  2880          ; total # of sectors if over 32 MB
+    iMedia        db  0xF0          ; media Descriptor
+    iFatSize      dw  9             ; size of each FAT
+    iTrackSect    dw  9             ; sectors per track
+    iHeadCnt      dw  2             ; number of read-write heads
+    iHiddenSect   dd  0             ; number of hidden sectors
+    iSect32       dd  0             ; # sectors for over 32 MB
+    iBootDrive    db  0             ; holds drive that the boot sector came from
+    iReserved     db  0             ; reserved, empty
+    iBootSign     db  0x29          ; extended boot sector signature
+    iVolID        db  "seri"        ; disk serial
+    acVolumeLabel db  "bHVolume   " ; volume label
+    acFSType      db  "FAT16   "    ; file system type
 
 ; AD ED C4 E4 FA C4 E4 C6
 
