@@ -3,8 +3,8 @@
 .text
 .org 0x0
 
-LOAD_SEGMENT = 0x1000
-FAT_SEGMENT  = 0x0EE0 # just randomly chosen (yep i stole that from a tutorial)
+LOAD_SEGMENT = 0x9000
+FAT_SEGMENT  = 0x8200 # just randomly chosen (yep i stole that from a tutorial)
 
 .global main
 
@@ -15,7 +15,7 @@ bootsector:
     iOEML:         .ascii "bHOS_32 "
     iSectSize:     .word  0x200
     iClustSize:    .byte  1             # sectors per cluster
-    iResSect:      .word  2             # #of reserved sectors
+    iResSect:      .word  3             # #of reserved sectors
     iFatCnt:       .byte  2             # #of FAT copies
     iRootSize:     .word  224           # size of root directory
     iTotalSect:    .word  2880          # total # of sectors if over 32 MB
@@ -54,12 +54,13 @@ bootsector:
         pop  bx             # destination
         push cx
 
-        # cmp  byte ptr lba_conversion_enabled, 1
-        # je   convert_lba
-        # xor  dx, dx
-        # mov  cl, al
-        # mov  ch, 0
-        # jmp  read
+        cmp  byte ptr lba_conversion_enabled, 1
+        je   convert_lba
+        xor  dx, dx
+        mov  cl, al
+        mov  ch, 0
+        inc  cl
+        jmp  read
 
         convert_lba:
             push bx             # to not loose the destination value
@@ -96,19 +97,19 @@ bootsector:
 .endfunc
 
 
-# .func WriteNum
-#     WriteNum:
-#         cmp al, 0xA
-#         jb  WriteNumOut
+.func WriteNum
+    WriteNum:
+        cmp al, 0xA
+        jb  WriteNumOut
         
-#         add al, 7
+        add al, 7
 
-#     WriteNumOut:
-#         add al, 0x30
-#         mov ah, 0xE
-#         int 0x10
-#         ret
-# .endfunc
+    WriteNumOut:
+        add al, 0x30
+        mov ah, 0xE
+        int 0x10
+        ret
+.endfunc
 
 
 .global PrintStr
@@ -141,26 +142,34 @@ start:
     mov  ax, 0x03
     int  0x10
 
-    # determine LBA mode:
-    # xor  ax, ax
-    # int  0x16
-    # sub  al, 0x30 # char -> int
-    # cmp  al, 1
-    # ja   bootFailure
-    # mov  ignore_disk_err, ax
+    mov  al, '!'
+    call WriteChar
+ 
+    mov  dl, iBootDrive
+    xor  ax, ax
+    int 0x13
 
-    # lea  si, loadingMsg
-    # call WriteString
-    # call IncRow
+    pusha
+    mov  si, 0x7c00
+    add  si, iSectSize
+    mov  ax, 1
+    push si
+    push ax
+    call ReadSector
+    popa
+   
+    lea  si, loadingMsg
+    call WriteString
+    call IncRow
 
     mov  dl, iBootDrive
     xor  ax, ax
     int  0x13
     jc   bootFailure
 
-    # lea  si, diskOkMsg
-    # call WriteString
-    # call IncRow
+    lea  si, diskOkMsg
+    call WriteString
+    call IncRow
     
     mov  ax, 32
     xor  dx, dx
@@ -222,8 +231,9 @@ start:
         lea  si, ssb_filename
         call WriteString
 
-        mov  ax, es:[bx + 0x1A]
-        mov  ssbf_strt, ax
+        add  bx, 0x1A
+        mov  ax, word ptr [bx]
+        mov  word ptr ssbf_strt, ax
 
         jmp  loadFat
 
@@ -243,11 +253,24 @@ start:
             push   bx # destination offset
             push   ax
             call   ReadSector
+            mov  ax, 'a'
+            call WriteNum
             popa
 
             add    bx, word ptr iSectSize
             inc    ax
             loopnz read_fat_sector
+
+       jmp load_ssb
+
+
+lba_conversion_enabled: .byte 1
+ignore_disk_err:        .byte 0
+
+
+.fill (510-(. - main)), 1, 0
+.int 0xAA55
+
 
     load_ssb:
         xor  bx, bx
@@ -275,7 +298,7 @@ start:
         add  si, dx
         add  si, FAT_SEGMENT
 
-        mov  dx, word[si]
+        mov  dx, ds:[si]
         test cx, 1
         jnz  read_next_even_cluster
         and  dx, 0x0FFF
@@ -285,8 +308,13 @@ start:
             shr  dx, 4
         
         read_cluster_done:
-            call Pause
             mov  cx, dx
+#            jmp  LOAD_SEGMENT # im risky aha
+            mov  al, ch 
+            call IncRow
+            call WriteNum
+            mov  al, cl 
+            call WriteNum
             cmp  cx, 0xFF8
             jl   load_file_sector
 
@@ -297,30 +325,27 @@ start:
             int  0x10
 
 
-
+        call Pause
         
         jmp  LOAD_SEGMENT
 
 
-        
-lba_conversion_enabled: .byte 1
-ignore_disk_err:        .byte 0
-
 root_scts:              .word  0
 root_strt:              .word  0
 ssbf_strt:              .word  0
+                        .byte  0
 
-ssb_filename:           .asciz "SSB"
+ssb_filename:           .ascii "SSB"
 
-loadingMsg:             .asciz ""
-diskErrorMsg:           .asciz "d"
-diskOkMsg:              .asciz ""
-ssbNotFound:            .asciz "s"
-rebootMsg:              .asciz ""
-pauseMsg:               .asciz "p"
+ssbMsg:                 .asciz " is found. "
+loadingMsg:             .asciz "bHOS is loading..."
+diskErrorMsg:           .asciz "Disk error. "
+diskOkMsg:              .asciz "Disk is ok. "
+ssbNotFound:            .asciz "SSB not found. "
+rebootMsg:              .asciz "Press any key to reboot..."
+pauseMsg:               .asciz "Pause..."
 
 
-.fill (510-(. - main)), 1, 0
-.int 0xAA55
+.fill (512-(. - load_ssb)), 1, 0
 
 Tmp:

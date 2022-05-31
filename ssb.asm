@@ -3,11 +3,14 @@
 .text
 .org 0x0
 
+jmp  bHOS_ssb
+
 .include "vga.asm"
 
 bHOS_ssb:
     xor  ax, ax
-    mov  al, 0x13
+    mov  al, 0x03
+    int  0x10
 
     mov  ah, 0xA
     mov  al, 'y'
@@ -19,7 +22,7 @@ bHOS_ssb:
     call WriteString
     call Pause
 
+.fill (1024 - (. - bHOS_ssb)), 1, 0
+
 welcomeMsg: .asciz "Welcome to bHOS's second stage bootloader!"
 pauseMsg:   .asciz "Press any key to continue..."
-
-# .fill (1024 - (. - bHOS_ssb)), 1, 0

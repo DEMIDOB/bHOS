@@ -1,5 +1,7 @@
 .func WriteString
     WriteString:
+        pusha
+    WriteString_loop:
         lodsb
         or  al, al
         jz  WriteString_end
@@ -9,11 +11,29 @@
         mov bl, 0xF
         int 0x10
 
-        jmp WriteString
+        jmp WriteString_loop
 
     WriteString_end:
+        popa
         retw
 .endfunc 
+
+
+.func WriteChar
+    WriteChar:
+        push ax
+        push bx
+        
+        mov  ah, 0xE
+        xor  bh, bh
+        mov  bl, 0xF
+        int 0x10
+
+        pop  bx
+        pop  ax
+        
+        retw
+.endfunc
 
 
 .func IncRow
