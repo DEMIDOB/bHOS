@@ -1,0 +1,12 @@
+.vs/
+dermo/
+FASM/
+"old stuff"/
+test/
+
+*.o
+*.out
+*.iso
+*.bin
+*.vfd
+*uibak

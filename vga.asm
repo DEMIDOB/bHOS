@@ -1,0 +1,51 @@
+.func WriteString
+    WriteString:
+        lodsb
+        or  al, al
+        jz  WriteString_end
+
+        mov ah, 0xE
+        xor bh, bh
+        mov bl, 0xF
+        int 0x10
+
+        jmp WriteString
+
+    WriteString_end:
+        retw
+.endfunc 
+
+
+.func IncRow
+    IncRow:
+        pusha
+        
+        mov bh, 0
+        mov ah, 0x03
+        int 0x10
+
+        inc dh
+        xor dl, dl
+        mov ah, 0x02
+        int 0x10
+
+        popa
+
+        retw
+.endfunc
+
+
+.func Pause
+    Pause:
+        pusha
+        call  IncRow
+        lea   si, pauseMsg
+        call  WriteString
+        xor   ax, ax
+        int   0x16
+        popa
+        ret
+.endfunc
+
+
+
