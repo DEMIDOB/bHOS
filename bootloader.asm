@@ -318,15 +318,10 @@ ignore_disk_err:        .byte 0
             cmp  cx, 0xFF8
             jl   load_file_sector
 
-            mov  ah, 0xA
-            mov  al, 'y'
-            xor  bh, bh
-            mov  cx, 1
-            int  0x10
-
-
         call Pause
-        
+        mov  ax, word ptr LOAD_SEGMENT
+        mov  es, ax
+        mov  ds, ax
         jmp  LOAD_SEGMENT
 
 

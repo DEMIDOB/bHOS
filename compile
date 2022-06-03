@@ -3,7 +3,7 @@ ld -o bootloader.out bootloader.o -Ttext 0x7C00
 objcopy -O binary -j .text bootloader.out bootloader.bin
 
 as -o ssb.o ssb.asm
-ld -o ssb.out ssb.o -Ttext 0x9000
+ld -o ssb.out ssb.o -Ttext 0x0
 objcopy -O binary -j .text ssb.out ssb.bin
 
 cp ssb.bin /mnt/c/users/dania/Desktop/ssb.bin
