@@ -12,9 +12,8 @@ bHOS_ssb:
     mov  al, 0x03
     int  0x10
 
-    mov  si, 0x9064
     mov  ah, 0xA
-    mov  al, byte ptr [si]
+    mov  al, 'n'
     xor  bh, bh
     mov  cx, 1
     int  0x10

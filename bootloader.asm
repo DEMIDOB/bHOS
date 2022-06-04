@@ -20,8 +20,8 @@ bootsector:
     iRootSize:     .word  224           # size of root directory
     iTotalSect:    .word  2880          # total # of sectors if over 32 MB
     iMedia:        .byte  0xF0          # media Descriptor
-    iFatSize:      .word  9             # size of each FAT
-    iTrackSect:    .word  9             # sectors per track
+    iFatSize:      .word  18            # size of each FAT
+    iTrackSect:    .word  18            # sectors per track
     iHeadCnt:      .word  2             # number of read-write heads
     iHiddenSect:   .int   0             # number of hidden sectors
     iSect32:       .int   0             # # sectors for over 32 MB
