@@ -1,0 +1,2 @@
+sudo dd if=/dev/sdc of=./test.img bs=1M count=100
+sudo qemu-system-x86_64 ./test.img

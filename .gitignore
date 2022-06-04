@@ -9,4 +9,5 @@ test/
 *.iso
 *.bin
 *.vfd
-*uibak
+*.uibak
+*.img

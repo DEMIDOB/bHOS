@@ -6,4 +6,4 @@ as -o ssb.o ssb.asm
 ld -o ssb.out ssb.o -Ttext 0x0
 objcopy -O binary -j .text ssb.out ssb.bin
 
-cp ssb.bin /mnt/c/users/dania/Desktop/ssb.bin
+cp ssb.bin /media/lamacaroine/6972-6573/ssb.bin 
