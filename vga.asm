@@ -69,3 +69,18 @@
 
 
 
+.func WriteNum
+    WriteNum:
+        cmp al, 0xA
+        jb  WriteNumOut
+        
+        add al, 7
+
+    WriteNumOut:
+        add al, 0x30
+        mov ah, 0xE
+        int 0x10
+        ret
+.endfunc
+
+

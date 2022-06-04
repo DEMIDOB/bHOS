@@ -6,34 +6,16 @@
 LOAD_SEGMENT = 0x9000
 FAT_SEGMENT  = 0x8200 # just randomly chosen (yep i stole that from a tutorial)
 
+
 .global main
 
 main:
     jmp start
 
-bootsector:
-    iOEML:         .ascii "bHOS_32 "
-    iSectSize:     .word  0x200
-    iClustSize:    .byte  1             # sectors per cluster
-    iResSect:      .word  3             # #of reserved sectors
-    iFatCnt:       .byte  2             # #of FAT copies
-    iRootSize:     .word  224           # size of root directory
-    iTotalSect:    .word  2880          # total # of sectors if over 32 MB
-    iMedia:        .byte  0xF0          # media Descriptor
-    iFatSize:      .word  18            # size of each FAT
-    iTrackSect:    .word  18            # sectors per track
-    iHeadCnt:      .word  2             # number of read-write heads
-    iHiddenSect:   .int   0             # number of hidden sectors
-    iSect32:       .int   0             # # sectors for over 32 MB
-    iBootDrive:    .byte  0             # holds drive that the boot sector came from
-    iReserved:     .byte  0             # reserved, empty
-    iBootSign:     .byte  0x29          # extended boot sector signature
-    iVolID:        .ascii "seri"        # disk serial
-    acVolumeLabel: .ascii "BHVOLUME   " # volume label
-    acFSType:      .ascii "FAT16   "    # file system type
 
-
+.include "bootsector.asm"
 .include "vga.asm"
+.include "drivers/disk.asm"
 
 
 .func Reboot
@@ -44,82 +26,6 @@ bootsector:
         int  0x16
 
         int 0x19
-.endfunc
-
-
-.func ReadSector # (dw sector, dw dest) mind the es!
-    ReadSector:
-        pop  cx
-        pop  ax             # LBA sector number
-        pop  bx             # destination
-        push cx
-
-        cmp  byte ptr lba_conversion_enabled, 1
-        je   convert_lba
-        xor  dx, dx
-        mov  cl, al
-        mov  ch, 0
-        inc  cl
-        jmp  read
-
-        convert_lba:
-            push bx             # to not loose the destination value
-            
-            mov  bx, iTrackSect
-            xor  dx, dx
-            div  bx
-            inc  dx
-            mov  cl, dl
-
-            mov  bx, iHeadCnt
-            xor  dx, dx
-            div  bx
-            mov  ch, al
-            xchg dl, dh
-
-            pop  bx             # get the destination value back
-
-        read:
-            mov  dl, iBootDrive
-            mov  ax, 0x0201
-
-            cmp byte ptr ignore_disk_err, 1
-            je  read_ignore
-    
-            int  0x13
-            jc   bootFailure
-
-            ret
-
-        read_ignore:
-            int 0x13
-            ret
-.endfunc
-
-
-.func WriteNum
-    WriteNum:
-        cmp al, 0xA
-        jb  WriteNumOut
-        
-        add al, 7
-
-    WriteNumOut:
-        add al, 0x30
-        mov ah, 0xE
-        int 0x10
-        ret
-.endfunc
-
-
-.global PrintStr
-.func PrintStr
-    PrintStr:
-        pop  ax
-        pop  si
-        push ax
-        call WriteString
-        ret
 .endfunc
 
 
@@ -142,7 +48,7 @@ start:
     mov  ax, 0x03
     int  0x10
 
-    mov  al, '!'
+    mov  al, '-'
     call WriteChar
  
     mov  dl, iBootDrive
@@ -187,18 +93,20 @@ start:
     add  ax, word ptr iResSect
     mov  root_strt, ax
     
-    
     mov  cx, word ptr root_scts
 
-    read_new_fat_sector:
+    read_new_root_sector:
         # read root_strt sector
 
         pusha
-        lea  si, Tmp
+	lea  si, Tmp
         push si         # destination (hopefully, stack is not that huge ^_^)
         push ax         # source
         call ReadSector
         popa
+
+	lea  si, Tmp
+	call WriteString
 
         push ax
         push cx
@@ -220,7 +128,7 @@ start:
         pop    cx
         pop    ax
         inc    ax
-        loopnz read_new_fat_sector
+        loopnz read_new_root_sector
 
     notFoundBootFile:
         lea  si, ssbNotFound
@@ -253,7 +161,7 @@ start:
             push   bx # destination offset
             push   ax
             call   ReadSector
-            mov  ax, 'a'
+            mov  ax, cx
             call WriteNum
             popa
 
