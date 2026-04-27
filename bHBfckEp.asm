@@ -51,6 +51,15 @@ bfck_ep:
         cmp al, ']'
         je bfck_continue_user_loop
 
+        cmp al, ' '
+        je bfck_continue_main_loop
+
+        cmp al, 10
+        je bfck_continue_main_loop
+
+        cmp al, 13
+        je bfck_continue_main_loop
+
         jmp bfck_syntax_error ; if no match
 
     bfck_inc_dp:
@@ -112,9 +121,8 @@ bfck_ep:
         jmp bfck_continue_main_loop
 
     bfck_continue_main_loop:
-        cmp al, 0
         inc si
-        jne bfck_main_loop ; if not the end of string, continue
+        jmp bfck_main_loop ; if not the end of string, continue
 
     bfck_syntax_error:
         mov cx, si
