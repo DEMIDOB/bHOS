@@ -4,7 +4,7 @@ include 'bHBfckEp.asm'
 
 PROGRAM_REF_SIZE = 32
 KERNEL_SIZE_SECT = 10
-KERNEL_CALL_BUFFER_SIZE = 128
+KERNEL_CALL_BUFFER_SIZE = 1024
 
 macro int_to_char2 num, buffer {
     mov [buffer], 0

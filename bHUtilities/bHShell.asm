@@ -1,6 +1,6 @@
 org 0x7c00 + 512 * (KERNEL_SIZE_SECT + 1)
 
-SHELL_PROGRAM_SIZE = 7
+SHELL_PROGRAM_SIZE = 10
 KB_BUFFER_LENGTH = KERNEL_CALL_BUFFER_SIZE
 
 shellProgramSignature db 0x09, 0x11
@@ -59,7 +59,7 @@ display_time_ret:
 
 shell_loop:
     mov byte[com_ok], 0
-    clear_buffer KBBuffer
+    clear_buffer KBBuffer, KB_BUFFER_LENGTH
     call inc_row
     call inc_cursor
     printc '>', 0xF
