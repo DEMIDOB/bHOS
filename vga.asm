@@ -264,12 +264,12 @@ macro inps buffer {
     pop si
 }
 
-macro clear_buffer buffer {
+macro clear_buffer buffer, bufferSize {
     push si
     push di
     
     mov si, buffer
-    mov di, 16
+    mov di, bufferSize
     
     sbl:
         cmp di, 0
