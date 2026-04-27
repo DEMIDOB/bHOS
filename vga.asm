@@ -133,6 +133,60 @@ macro fast_printn num {
     call inc_cursor
 }
 
+macro printhexword hex_word {
+    push ax
+    mov ax, hex_word
+    call printhexword_from_ax
+    pop ax
+}
+
+macro le_printhexword hex_word {
+    push ax
+    mov ax, hex_word
+    xchg ah, al
+    call printhexword_from_ax
+    pop ax
+}
+
+printhexword_from_ax:
+    push dx
+    push si
+
+    fast_printc '0'
+    fast_printc 'x'
+
+    mov dx, ax
+    and dx, 0xF000
+    shr dx, 12
+    mov si, hex_to_char
+    add si, dx
+    fast_printc [si]
+
+    mov dx, ax
+    and dx, 0x0F00
+    shr dx, 8
+    mov si, hex_to_char
+    add si, dx
+    fast_printc [si]
+
+    mov dx, ax
+    and dx, 0x00F0
+    shr dx, 4
+    mov si, hex_to_char
+    add si, dx
+    fast_printc [si]
+
+    mov dx, ax
+    and dx, 0x000F
+    mov si, hex_to_char
+    add si, dx
+    fast_printc [si]
+
+    pop si
+    pop dx
+
+    ret
+
 sloop:
     printc [si], 0xF
     inc si
@@ -147,6 +201,23 @@ macro puts str_start_ptr {
     call sloop
     pop si
 }
+
+; prints:
+;     ; prints the string at the address which is on top of the stack
+
+;     prints_buffer dw 0
+;     prints_return_address dw 0
+;     mov [prints_buffer], si ; save the value of si
+
+;     pop si
+;     mov [prints_return_address], si
+    
+;     pop si     ; get the pointer
+;     call sloop ; sloop expects the pointer to be in si
+
+;     mov si, [prints_buffer] ; restore the value of si
+
+;     jmp [prints_return_address]
 
 macro inps buffer {
     push si
@@ -214,3 +285,5 @@ macro clear_buffer buffer {
     pop di
     pop si
 }
+
+hex_to_char db '0123456789ABCDEF'

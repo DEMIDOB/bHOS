@@ -43,6 +43,7 @@ program_start:
 include 'bHUtilities/bHShell.asm'
 include 'bHUtilities/bHDraw.asm'
 include 'bHUtilities/bHClock.asm'
+include 'bHUtilities/bHBfck.asm'
 
 times (0x6000)-($-$$) db 0
 

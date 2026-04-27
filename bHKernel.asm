@@ -1,7 +1,10 @@
 include 'bHMemory.asm'
 include 'bHCommandUtility.asm'
+include 'bHBfckEp.asm'
 
 PROGRAM_REF_SIZE = 32
+KERNEL_SIZE_SECT = 10
+KERNEL_CALL_BUFFER_SIZE = 128
 
 macro int_to_char2 num, buffer {
     mov [buffer], 0
@@ -59,7 +62,7 @@ kernel_start:
     
         mov dl, byte[boot_disk]
         mov ch, 0x00 ; cylinder 0
-        mov cl, 0x05 ; sector 5 (initially)
+        mov cl, KERNEL_SIZE_SECT + 2 ; sector KERNEL_SIZE_SECT + 2 (initially)
         add cl, [scanOffset]
         xor dh, dh     ; head 0
         mov al, 0x01   ; load sectors
@@ -113,8 +116,8 @@ kernel_start:
 
         call unload_current_program
 
-        puts installedProgramsList
-        call inc_row
+        ; puts installedProgramsList
+        ; call inc_row
 
         xor di, di
 
@@ -129,18 +132,20 @@ kernel_start:
         inc di
         mov cl, byte[di]
 
-        mov dl, byte[boot_disk]
-        mov ch, 0x00 ; cylinder 0
-        xor dh, dh     ; head 0
-        mov bx, program_start ; write to RAM from here
-        mov ah, 0x02   ; read sectors into memory
-        int 0x13       ; boom!
+        ; load the program to memory
+        mov dl, byte[boot_disk] ; reading from the boot disk
+        mov ch, 0x00            ; cylinder 0
+        xor dh, dh              ; head 0
+        mov bx, program_start   ; write to RAM from here
+        mov ah, 0x02            ; read sectors into memory
+                                ; al is written above (get r. program size)
+        int 0x13                ; boom!
 
         memcpy requested_program, current_program, 2
         mov ax, kernelCallBuffer
         mov [program_start + 4], ax
 
-        call clear_kernelCallBuffer
+        ; call clear_kernelCallBuffer
     
         ; mov word[current_program], word[requested_program]
         jmp program_start + 32
@@ -181,7 +186,7 @@ kernel_start:
         ret
 
     kernelCallBuffer:
-        times 128 db 0
+        times KERNEL_CALL_BUFFER_SIZE db 0
 
     kernelCall:
         CheckCommand kernelCallBuffer, runKCallCmd, 3, kernelCall_run
@@ -195,8 +200,7 @@ kernel_start:
         jmp bx
 
     kernelCall_run:
-        puts kernelCallBuffer
-        call inc_row
+        ; call inc_row
         mov si, kernelCallBuffer
         add si, 4
         mov di, requested_program
@@ -206,9 +210,11 @@ kernel_start:
         jmp start_requested_app
 
     kernelCall_pause:
-        puts pauseKCallCmd
+        puts pauseKCallCmd          ; print "pause"
+        
         xor ah, ah
-        int 0x16
+        int 0x16                    ; wait for any keystroke
+
         call clear_kernelCallBuffer
         ret
 
@@ -259,4 +265,4 @@ installedProgramsAmount dw 0
 installedProgramsList:
 
 kernel_end:
-times 2048-($-$$) db 0
+times 512 * (KERNEL_SIZE_SECT + 1) - ($ - $$) db 0

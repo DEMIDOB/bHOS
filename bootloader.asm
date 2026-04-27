@@ -18,7 +18,7 @@ int 0x10
 ; load system from the disk
 mov cx, 0x0002 ; cylinder 0, sector 2
 xor dh, dh     ; head 0
-mov al, 0x03   ; load 3 sectors
+mov al, KERNEL_SIZE_SECT   ; load 3 sectors
 mov bx, os_start ; write to RAM from here
 mov ah, 0x02   ; read sectors into memory
 int 0x13       ; boom!

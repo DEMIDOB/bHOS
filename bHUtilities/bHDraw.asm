@@ -1,4 +1,4 @@
-org 0x7c00 + 0x800
+org 0x7c00 + 512 * (KERNEL_SIZE_SECT + 1)
 
 DRAW_PROGRAM_SIZE = 1
 

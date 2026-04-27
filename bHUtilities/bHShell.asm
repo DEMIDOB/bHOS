@@ -1,6 +1,7 @@
-org 0x7c00 + 0x800
+org 0x7c00 + 512 * (KERNEL_SIZE_SECT + 1)
 
-SHELL_PROGRAM_SIZE = 3
+SHELL_PROGRAM_SIZE = 7
+KB_BUFFER_LENGTH = KERNEL_CALL_BUFFER_SIZE
 
 shellProgramSignature db 0x09, 0x11
 db SHELL_PROGRAM_SIZE
@@ -66,7 +67,7 @@ shell_loop:
     call inc_cursor
 
     mov si, KBBuffer
-    mov di, 0x20 ; KBBuffer length
+    mov di, KB_BUFFER_LENGTH ; KBBuffer length
     mov bp, di
 
     shell_wait_for_input_loop:
@@ -119,10 +120,13 @@ shell_loop:
     CheckCommand KBBuffer, InfoCMD, 4, info_cmd
     CheckCommand KBBuffer, TimeCMD, 4, time_cmd
     CheckCommand KBBuffer, DrawCMD, 4, draw
-    CheckCommand KBBuffer, ClearsCMD, 6, clears_cmd
+    CheckCommand KBBuffer, ClearsCMD, 5, clears_cmd
     CheckCommand KBBuffer, ClockCMD, 5, clock
     CheckCommand KBBuffer, KCallCMD, 6, kernel_cmd
     CheckCommand KBBuffer, ProglistCMD, 8, proglist_cmd
+    CheckCommand KBBuffer, mreadCMD, 5, mread_cmd
+    CheckCommand KBBuffer, bfckCMD, 1, bfck_cmd
+    CheckCommand KBBuffer, bfoutCMD, 5, bfout_cmd
     ; ========  parse command_end ======== 
 
     cmp byte[com_ok], 0
@@ -223,6 +227,18 @@ proglist_cmd:
         call inc_row
         jmp shell_loop
 
+mread_cmd:
+    ; fast_printc 'x'
+    le_printhexword [0x7c00 + 0x200 - 2]
+    jmp shell_loop
+
+bfck_cmd:
+    bfck_run KBBuffer + 1, bHShell_bfckTape
+    jmp shell_loop
+
+bfout_cmd:
+    puts bHShell_bfckTape
+    jmp shell_loop
 
 reboot:
     mov byte[com_ok], 1
@@ -263,8 +279,10 @@ ProgramsAmountMsgStart db "Programs installed: "
 ProgramsAmountMsgNum db 0, 0
 
 ; Buffers:
-KBBuffer db 0
-times 31 db 0
+KBBuffer:
+    times KB_BUFFER_LENGTH db 0
+KBBufferRecent:
+    times KB_BUFFER_LENGTH db 0
 
 bHShell_STCurrentTimeString db "Current time is "
 bHShell_STCurrentTimeStringCont:
@@ -281,20 +299,27 @@ cursorCol db 0
 RebootCMD db 'reboot', 0
 ShutdownCMD db 'shutdown', 0
 TimeCMD db 'time', 0
-ClearsCMD db 'clears', 0
+ClearsCMD db 'clear', 0
 ProglistCMD db 'proglist', 0
 PauseCMD db 'pause', 0
+mreadCMD db 'mread', 0
+bfckCMD db 'b', 0
+bfoutCMD db 'bfout', 0
 
 DrawCMD db 'draw', 0
 ClockCMD db 'clock', 0
 KCallCMD db 'kernel', 0
 
 InfoCMD db 'info', 0
-InfoRP db 'bHOS by DEM!DOB v0.7', 0
+InfoRP db 'bHOS by DEM!DOB v0.9', 0
 
 wc db 'Unknown command!', 0
 
 ; Required kernel calls
 bHShell_timestrKernelCall db "timestr", 0
+
+; bfck tape
+bHShell_bfckTape db 0
+times 1023 db 0
 
 times 512 * SHELL_PROGRAM_SIZE - ($ - shellProgramSignature) db 0

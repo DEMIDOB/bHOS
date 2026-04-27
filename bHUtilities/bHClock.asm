@@ -1,4 +1,4 @@
-org 0x7c00 + 0x800
+org 0x7c00 + 512 * (KERNEL_SIZE_SECT + 1)
 
 CLOCK_PROGRAM_SIZE = 1
 
@@ -51,7 +51,7 @@ times 6 db 0
 
 bHClock_exitKernelCall db "run 0"
 
-times 512 * SHELL_PROGRAM_SIZE - ($ - shellProgramSignature) db 0
+times 512 * CLOCK_PROGRAM_SIZE - ($ - clockProgramSignature) db 0
 
 
 

@@ -3,7 +3,7 @@ macro kernelCall callString, kernelCallBufferPointer {
 	push dx
 
 	mov dx, [kernelCallBufferPointer]
-	memcpy callString, dx, 26
+	memcpy callString, dx, KERNEL_CALL_BUFFER_SIZE - 6
 
 	mov dx, [kernelCallBufferPointer]
 	add dx, 128
