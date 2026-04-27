@@ -256,7 +256,7 @@ com_ok db 0
 
 ; Strings
 HelloMsg db "Hello, it's bHOS", 0
-OsTitle db "bHOS v0.8-dev"
+OsTitle db "bHOS v0.9-dev"
 OsTitleEnd db 0
 
 ProgramsAmountMsgStart db "Programs installed: "
