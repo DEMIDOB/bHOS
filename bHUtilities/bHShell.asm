@@ -92,6 +92,9 @@ shell_loop:
         cmp al, 8
         je backspace
 
+        cmp ax, 0x4800
+        je arrow_up
+
         ; just regular symbol, then...
         fast_printc al
         mov byte[si], al
@@ -109,10 +112,40 @@ shell_loop:
             printc 0x0, 0xF
             mov byte[si], 0
             jmp shell_wait_for_input_loop
+        
+        clear_current_input:
+            cmp bp, di
+            jne continue_clear_current_input
+            ret
+        
+        continue_clear_current_input:
+            call dec_cursor
+            dec si
+            inc di
+            printc 0x0, 0xF
+            mov byte[si], 0
+
+            jmp clear_current_input
+
+            ret
+
+        arrow_up:
+            call clear_current_input
+            memcpy KBBufferRecent, KBBuffer, KB_BUFFER_LENGTH
+
+            recover_sloop:
+                fast_printc [si]
+                inc si
+                dec di
+                cmp byte[si], 0x0
+                jne recover_sloop
+
+            jmp shell_wait_for_input_loop
 
     shell_wait_for_input_loop_end:
 
     call inc_row
+    memcpy KBBuffer, KBBufferRecent, KB_BUFFER_LENGTH
     
     ; ==========  parse command ==========
     CheckCommand KBBuffer, RebootCMD, 6, reboot
