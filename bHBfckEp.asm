@@ -46,7 +46,7 @@ bfck_ep:
         je bfck_in_tape_at_dp
 
         cmp al, '['
-        je bfck_continue_main_loop
+        je bfck_start_user_loop
 
         cmp al, ']'
         je bfck_continue_user_loop
@@ -54,13 +54,18 @@ bfck_ep:
         cmp al, ' '
         je bfck_continue_main_loop
 
-        cmp al, 10
-        je bfck_continue_main_loop
+        ; We used to treat everything except for allowed characters
+        ; and newline characters as syntax errors, but will ignore them for now...
 
-        cmp al, 13
-        je bfck_continue_main_loop
+        jmp bfck_continue_main_loop ; ...and simply continue executing
 
-        jmp bfck_syntax_error ; if no match
+        ; cmp al, 10
+        ; je bfck_continue_main_loop
+
+        ; cmp al, 13
+        ; je bfck_continue_main_loop
+
+        ; jmp bfck_syntax_error ; if no match
 
     bfck_inc_dp:
         inc di
@@ -103,22 +108,93 @@ bfck_ep:
         pop ax
         jmp bfck_continue_main_loop
 
-    bfck_continue_user_loop:
+    bfck_start_user_loop:
+        push bx                     ; this wil store bfck_nestingDepth
+        mov bl, [bfck_nestingDepth] ; will be used for handling closing brackets
+        
+        ; if we are here, the value in si points to a '['
+        ; so we automatically increment nestingDepth
+        inc [bfck_nestingDepth]
+
         ; read the current tape value
         mov dl, byte[di]
         cmp dl, 0
-        je bfck_continue_main_loop ; continue normally if 0
+        jne bfck_start_user_loop_break ; if not zero, execute the loop
+
+        ; otherwise find the closing ']'...
+        bfck_find_closing_sqbr_loop:
+            ; TODO: do not allow si < code start!!!
+            inc si
+            mov al, byte[si]
+
+            cmp al, ']'
+            je .found_closing
+
+            cmp al, '['
+            je .found_opening
+
+            jmp bfck_find_closing_sqbr_loop
+
+            .found_closing:                     ; if a ']' is found, we ...
+                dec [bfck_nestingDepth]         ; ... decrement the nestingDepth and ...
+                cmp bl, [bfck_nestingDepth]     ; ... check if the nestingDepth has the value we started with
+                jne bfck_find_closing_sqbr_loop ; continue the iteration if not
+                jmp bfck_start_user_loop_break  ; or exit the loop otherwise
+                
+            .found_opening: ; if a '[' is found, we ...
+                inc [bfck_nestingDepth]
+                jmp bfck_find_closing_sqbr_loop
+
+        bfck_start_user_loop_break:
+            ; ... and continue from there
+            pop bx
+            jmp bfck_continue_main_loop
+
+    bfck_continue_user_loop:
+        push bx                     ; this wil store bfck_nestingDepth
+        
+                                    ; if we are here, the value in si points to a '[',
+        dec [bfck_nestingDepth]     ; so we increment nestingDepth
+
+        mov bl, [bfck_nestingDepth] ; will be used for handling closing brackets
+                                    ; IMPORTANT: here, before moving backwards, we FIRST decrement THEN store the value
+                                    ; (compared to before moving forward at bfck_start_user_loop)
+
+        ; read the current tape value
+        mov dl, byte[di]
+        cmp dl, 0
+        je bfck_continue_user_loop_break ; reenter the loop iff != 0
 
         ; otherwise find the opening '['...
+        inc [bfck_nestingDepth]
         bfck_find_opening_sqbr_loop:
             ; TODO: do not allow si < code start!!!
             dec si
             mov al, byte[si]
-            cmp al, '['
-            jne bfck_find_opening_sqbr_loop
 
-        ; ... and continue from there
-        jmp bfck_continue_main_loop
+            cmp al, ']'
+            je .found_closing
+
+            cmp al, '['
+            je .found_opening
+
+            jmp bfck_find_opening_sqbr_loop
+
+            .found_closing:                     ; if a ']' is found, we ...
+                inc [bfck_nestingDepth]
+                jmp bfck_find_opening_sqbr_loop
+                
+            .found_opening: ; if a '[' is found, we ...
+                dec [bfck_nestingDepth]           ; ... decrement the nestingDepth and ...
+                cmp bl, [bfck_nestingDepth]       ; ... check if the nestingDepth has the value we started with
+                jne bfck_find_opening_sqbr_loop   ; continue the iteration if not
+                inc [bfck_nestingDepth]
+                jmp bfck_continue_user_loop_break ; or exit the loop otherwise
+
+        bfck_continue_user_loop_break:
+            ; ... and continue from there
+            pop bx
+            jmp bfck_continue_main_loop
 
     bfck_continue_main_loop:
         inc si
@@ -143,3 +219,7 @@ bfck_ep:
     pop ax
     
     ret
+
+; we need to control nested brackets like [[.]]
+; so here, we store the nesting depth
+bfck_nestingDepth db 0
